@@ -23,7 +23,9 @@ def get_link(db: Session, link_id: UUID) -> Link | None:
 
 
 def get_click_count(db: Session, link_id: UUID) -> int:
-    statement = select(func.count(ClickEvent.id)).where(ClickEvent.link_id == link_id)
+    statement = select(func.count(ClickEvent.id)).where(
+        ClickEvent.link_id == link_id, ClickEvent.is_human.is_(True)
+    )
     return int(db.scalar(statement) or 0)
 
 

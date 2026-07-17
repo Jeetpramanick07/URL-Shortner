@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import settings
 from app.database import engine
-from app.routers import domains, health, links, redirect
+from app.routers import analytics, domains, health, links, redirect
 
 
 @asynccontextmanager
@@ -49,5 +49,6 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(domains.router)
 app.include_router(links.router)
+app.include_router(analytics.router)
 # The catch-all redirect router must remain last.
 app.include_router(redirect.router)

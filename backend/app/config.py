@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     trust_proxy_headers: bool = False
     cors_origins: str = "http://localhost:3000,http://localhost:5173"
 
+    @field_validator("debug", mode="before")
+    @classmethod
+    def normalize_debug(cls, value: object) -> bool:
+        if isinstance(value, str) and value.strip().lower() in {"release", "production", "prod"}:
+            return False
+        return value
+
     @field_validator("database_url")
     @classmethod
     def validate_postgres_url(cls, value: str) -> str:

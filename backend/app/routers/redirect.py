@@ -13,6 +13,8 @@ from app.services.rotation_service import (
     advance_and_select_keyword,
     select_keyword_without_increment,
 )
+from app.services.request_classifier import classify_request
+from app.services.visitor_identity import daily_visitor_hash
 from app.utils.datetime import utc_now
 from app.utils.host import get_request_hostname
 from app.utils.ip_hash import hash_ip
@@ -60,11 +62,15 @@ def resolve_short_link(
             detail="This link has expired.",
         )
 
-    if request.method == "HEAD":
+    classification = classify_request(request.method, dict(request.headers))
+    if not classification.should_advance_keyword_rotation:
         selection = select_keyword_without_increment(
             click_sequence=row.click_sequence,
             keywords=row.keywords,
         )
+        # Retain non-human traffic for operational analytics without consuming keywords.
+        db.add(_click_event(row.id, request, classification, selection.keyword, selection.keyword_index, False))
+        db.commit()
     else:
         try:
             selection = advance_and_select_keyword(
@@ -72,21 +78,7 @@ def resolve_short_link(
                 link_id=row.id,
                 keywords=row.keywords,
             )
-            db.add(
-                ClickEvent(
-                    link_id=row.id,
-                    clicked_at=utc_now(),
-                    keyword_used=selection.keyword,
-                    keyword_position=selection.keyword_index,
-                    request_method="GET",
-                    user_agent=request.headers.get("user-agent"),
-                    referrer=request.headers.get("referer"),
-                    ip_hash=hash_ip(
-                        request.client.host if request.client else None,
-                        settings.ip_hash_secret.get_secret_value(),
-                    ),
-                )
-            )
+            db.add(_click_event(row.id, request, classification, selection.keyword, selection.keyword_index, True))
             db.commit()
         except Exception:
             db.rollback()
@@ -99,3 +91,20 @@ def resolve_short_link(
         associate_tag=row.associate_tag,
     )
     return _redirect_response(destination)
+
+
+def _click_event(link_id, request: Request, result, keyword: str, keyword_position: int, is_human: bool) -> ClickEvent:
+    headers = request.headers
+    country = city = None
+    if settings.trust_proxy_headers:
+        country = headers.get("cf-ipcountry") or headers.get("x-vercel-ip-country") or headers.get("cloudfront-viewer-country")
+        city = headers.get("x-vercel-ip-city")
+    ip = request.client.host if request.client else None
+    secret = settings.ip_hash_secret.get_secret_value()
+    return ClickEvent(link_id=link_id, clicked_at=utc_now(), keyword_used=keyword, keyword_position=keyword_position,
+        request_method=request.method, user_agent=(headers.get("user-agent") or "")[:2048] or None,
+        referrer=result.referrer, ip_hash=hash_ip(ip, secret), classification=result.classification,
+        device_category=result.device_category, operating_system=result.operating_system, browser=result.browser,
+        device_family=result.device_family, country=country, city=city, language=result.language,
+        referrer_domain=result.referrer_domain, visitor_hash=daily_visitor_hash(ip, headers.get("user-agent"), secret) if is_human else None,
+        is_bot=result.is_bot, is_preview=result.is_preview, is_prefetch=result.is_prefetch, is_human=is_human)

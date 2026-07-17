@@ -61,7 +61,7 @@ def test_get_requests_increase_click_count(
     assert response.json()["click_sequence"] == 2
 
 
-def test_head_does_not_change_counter_or_insert_event(
+def test_head_does_not_change_counter_or_insert_human_event(
     client, admin_headers, localhost_domain, create_link
 ):
     link = create_link(localhost_domain["id"])
@@ -74,7 +74,9 @@ def test_head_does_not_change_counter_or_insert_event(
     assert details["total_clicks"] == 0
 
     with SessionLocal() as db:
-        assert db.query(ClickEvent).count() == 0
+        event = db.query(ClickEvent).one()
+        assert event.classification == "head"
+        assert event.is_human is False
 
 
 def test_disabled_link_returns_404(
