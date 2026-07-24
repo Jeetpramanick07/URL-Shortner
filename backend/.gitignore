@@ -1,0 +1,26 @@
+@"
+# Secrets
+backend/.env
+frontend/.env
+*.env
+
+# Python
+backend/venv/
+backend/__pycache__/
+backend/.pytest_cache/
+**/__pycache__/
+*.pyc
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+"@ | Set-Content .gitignore
