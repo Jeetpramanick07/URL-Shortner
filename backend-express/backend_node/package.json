@@ -1,0 +1,33 @@
+{
+  "name": "amazon-smart-link-shortener",
+  "version": "1.0.0",
+  "description": "Amazon Smart Link Shortener — Express.js backend (migrated 1:1 from FastAPI). Owned-domain Amazon smart links with atomic keyword rotation, direct HTTP redirects and privacy-first click analytics.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed": "node scripts/seedDomains.js",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.2.0",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "pg": "^8.12.0",
+    "sequelize": "^6.37.3",
+    "ua-parser-js": "^1.0.38",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.4",
+    "supertest": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
