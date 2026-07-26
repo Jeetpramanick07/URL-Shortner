@@ -1,2 +1,26 @@
+# Environment files (keep documented examples)
+.env
+**/.env
+**/.env.*
+!**/.env.example
 
-frontend/.env
+# Python
+**/venv/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+*.py[cod]
+
+# Node / Vite
+**/node_modules/
+frontend/dist/
+
+# Vercel local project metadata
+**/.vercel/
+
+# Editors, OS files, and logs
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

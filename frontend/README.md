@@ -35,10 +35,9 @@ http://127.0.0.1:5173
 
 ```env
 VITE_API_BASE_URL=http://127.0.0.1:8000
-VITE_ADMIN_API_KEY=change-this-secret
 ```
 
-You can also change the API URL and admin key from the Settings screen. Those values are saved only in browser local storage.
+You can also change the API URL from the Settings screen. Enter the admin key there after deployment; it is saved only in that browser's local storage. Do not expose the backend's `ADMIN_API_KEY` as a `VITE_*` variable because Vite embeds those values in public browser assets.
 
 ## Backend requirements
 

@@ -1,9 +1,8 @@
 const ENV_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
-const ENV_ADMIN_KEY = import.meta.env.VITE_ADMIN_API_KEY || 'change-this-secret'
 
 export const getApiConfig = () => ({
   baseUrl: localStorage.getItem('linkorbit_api_base_url') || ENV_BASE_URL,
-  adminKey: localStorage.getItem('linkorbit_admin_key') || ENV_ADMIN_KEY,
+  adminKey: localStorage.getItem('linkorbit_admin_key') || '',
 })
 
 export const saveApiConfig = ({ baseUrl, adminKey }) => {
@@ -17,7 +16,7 @@ export async function apiRequest(path, options = {}) {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Key': adminKey,
+      ...(adminKey ? { 'X-Admin-Key': adminKey } : {}),
       ...(options.headers || {}),
     },
   })
